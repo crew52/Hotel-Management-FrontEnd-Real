@@ -41,7 +41,7 @@ function Nav() {
     });
 
     return (
-        <section style={{ backgroundColor: "#007bff", padding: "5px 18px" }}>
+        <section style={{ backgroundColor: "#0070f4", padding: "5px 18px" }}>
             <nav
                 style={{
                     display: "flex",
@@ -125,9 +125,9 @@ function Nav() {
                                     onClick={() => handleMenuItemClick("/admin/employee", "employeeList")}
                                     sx={{
                                         color: "#000000",
-                                        backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        backgroundColor: selectedMenuItem === "employeeList" ? "rgba(0,90,195,255)" : "transparent",
                                         "&:hover": {
-                                            backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                            backgroundColor: selectedMenuItem === "employeeList" ? "rgba(0,90,195,255)" : "rgba(255, 182, 193, 0.3)",
                                         },
                                     }}
                                 >
@@ -137,9 +137,9 @@ function Nav() {
                                     onClick={() => handleMenuItemClick("/admin/employee/schedule", "schedule")}
                                     sx={{
                                         color: "#000000",
-                                        backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        backgroundColor: selectedMenuItem === "schedule" ? "rgba(0,90,195,255)" : "transparent",
                                         "&:hover": {
-                                            backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                            backgroundColor: selectedMenuItem === "schedule" ? "rgba(0,90,195,255)" : "rgba(255, 182, 193, 0.3)",
                                         },
                                     }}
                                 >
@@ -149,9 +149,9 @@ function Nav() {
                                     onClick={() => handleMenuItemClick("/admin/employee/attendance", "attendance")}
                                     sx={{
                                         color: "#000000",
-                                        backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        backgroundColor: selectedMenuItem === "attendance" ? "rgba(0,90,195,255)" : "transparent",
                                         "&:hover": {
-                                            backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                            backgroundColor: selectedMenuItem === "attendance" ? "rgba(0,90,195,255)" : "rgba(255, 182, 193, 0.3)",
                                         },
                                     }}
                                 >
@@ -161,9 +161,9 @@ function Nav() {
                                     onClick={() => handleMenuItemClick("/admin/employee/payroll", "payroll")}
                                     sx={{
                                         color: "#000000",
-                                        backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        backgroundColor: selectedMenuItem === "payroll" ? "rgba(0,90,195,255)" : "transparent",
                                         "&:hover": {
-                                            backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                            backgroundColor: selectedMenuItem === "payroll" ? "rgba(0,90,195,255)" : "rgba(255, 182, 193, 0.3)",
                                         },
                                     }}
                                 >
@@ -173,9 +173,9 @@ function Nav() {
                                     onClick={() => handleMenuItemClick("/admin/employee/settings", "employeeSettings")}
                                     sx={{
                                         color: "#000000",
-                                        backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(0,90,195,255)" : "transparent",
                                         "&:hover": {
-                                            backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                            backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(0,90,195,255)" : "rgba(255, 182, 193, 0.3)",
                                         },
                                     }}
                                 >

@@ -29,7 +29,7 @@ export default function AppBarHeader({ onToggleMenu }) {
     };
 
     return (
-        <AppBar position="static" sx={{ backgroundColor: "#2aa24f", borderRadius: "8px", height: 50 }}>
+        <AppBar position="static" sx={{ backgroundColor: "#279656", borderRadius: "8px", height: 50 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "100%" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Box display="flex" alignItems="center">
