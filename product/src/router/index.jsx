@@ -46,9 +46,7 @@ const PartnersContent = () => (
 );
 
 const EmployeeContent = () => (
-    <section style={{ padding: "20px" }}>
         <Employee/>
-    </section>
 );
 
 const EmployeeScheduleContent = () => (
