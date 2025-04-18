@@ -1,287 +1,211 @@
 import { Box, Button, Popper, MenuList, MenuItem } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useRef } from "react";
 
-function Nav(){
+function Nav() {
+    const [open, setOpen] = useState(false);
+    const anchorRef = useRef(null);
+    const navigate = useNavigate();
+    const [activeButton, setActiveButton] = useState("overview");
+    const [selectedMenuItem, setSelectedMenuItem] = useState(null);
 
-        const [open, setOpen] = useState(false);
-        const anchorRef = useRef(null);
-        const navigate = useNavigate();
-        const [activeButton, setActiveButton] = useState("overview");
+    const handleMouseEnter = () => {
+        setOpen(true);
+    };
 
-        const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+    const handleMouseLeave = () => {
+        setOpen(false);
+    };
 
+    const handleButtonClick = (buttonKey) => {
+        setActiveButton(buttonKey);
+        setSelectedMenuItem(null);
+    };
 
-        const handleMouseEnter = () => {
-            setOpen(true);
-        };
+    const handleMenuItemClick = (path, itemKey) => {
+        setOpen(false);
+        setActiveButton("employee");
+        setSelectedMenuItem(itemKey);
+        navigate(path);
+    };
 
-        const handleMouseLeave = () => {
-            setOpen(false);
-        };
+    const textButtonSx = (isActive) => ({
+        color: "white",
+        fontWeight: "bold",
+        textTransform: "none",
+        borderRadius: 2,
+        backgroundColor: isActive ? "#FFB6C1" : "transparent",
+        "&:hover": {
+            backgroundColor: isActive ? "#FFB6C1" : "rgba(255, 182, 193, 0.3)",
+        },
+    });
 
-        const handleButtonClick = (buttonKey) => {
-            setActiveButton(buttonKey);
-            setSelectedMenuItem(null);
-
-        };
-
-        const handleMenuItemClick = (path, itemKey) => {
-            setOpen(false);
-            setActiveButton("employee");
-            setSelectedMenuItem(itemKey);
-            navigate(path);
-        };
-
-        const textButtonSx = (isActive) => ({
-            color: isActive ? "#FFFFFF" : "#FFFFFF",
-            fontWeight: "bold",
-            textTransform: "none",
-            borderRadius: 6,
-            backgroundColor: isActive ? "#FFB6C1" : "transparent",
-            "&:hover": {
-                backgroundColor: isActive ? "#FFB6C1" : "rgba(255, 182, 193, 0.3)",
-            },
-        });
-
-        const overviewButtonSx = (isActive) => ({
-            color: isActive ? "#FFFFFF" : "#FFFFFF",
-            backgroundColor: isActive ? "#FFB6C1" : "transparent",
-            fontWeight: "bold",
-            textTransform: "none",
-            borderRadius: 2,
-            "&:hover": {
-                backgroundColor: isActive ? "#FFB6C1" : "rgba(255, 182, 193, 0.3)",
-            },
-        });
-
-        return (
-            <section style={{ backgroundColor: "#007bff", padding: "5px 18px" }}>
-                <nav
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                    }}
+    return (
+        <section style={{ backgroundColor: "#007bff", padding: "5px 18px" }}>
+            <nav
+                style={{
+                    display: "flex",
+                    gap: "8px",
+                    alignItems: "center",
+                }}
+            >
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "overview")}
+                    component={Link}
+                    to="/admin"
+                    onClick={() => handleButtonClick("overview")}
                 >
-                    <Box
-                        display="flex"
-                        gap={1}
-                        sx={{
-                            overflowX: "auto",
-                            whiteSpace: "nowrap",
-                            "&::-webkit-scrollbar": {
-                                height: "2px",
-                            },
-                            "&::-webkit-scrollbar-track": {
-                                background: "#0052cc",
-                                borderRadius: "20px",
-                            },
-                            "&::-webkit-scrollbar-thumb": {
-                                background: "#ffffff",
-                                borderRadius: "20px",
-                            },
-                            "&::-webkit-scrollbar-thumb:hover": {
-                                background: "#e0e0e0",
-                            },
-                        }}
-                    >
-                        <Button
-                            variant="text"
-                            sx={overviewButtonSx(activeButton === "overview")}
-                            component={Link}
-                            to="/admin"
-                            onClick={() => handleButtonClick("overview")}
-                        >
-                            Tổng quan
-                        </Button>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "rooms")}
-                                component={Link}
-                                to="/admin/rooms"
-                                onClick={() => handleButtonClick("rooms")}
-                            >
-                                Phòng
-                            </Button>
-                        </Box>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "goods")}
-                                component={Link}
-                                to="/admin/goods"
-                                onClick={() => handleButtonClick("goods")}
-                            >
-                                Hàng hóa
-                            </Button>
-                        </Box>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "transactions")}
-                                component={Link}
-                                to="/admin/transactions"
-                                onClick={() => handleButtonClick("transactions")}
-                            >
-                                Giao dịch
-                            </Button>
-                        </Box>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "partners")}
-                                component={Link}
-                                to="/admin/partners"
-                                onClick={() => handleButtonClick("partners")}
-                            >
-                                Đối tác
-                            </Button>
-                        </Box>
-
-                        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "employee")}
-                                ref={anchorRef}
-                                onClick={() => handleButtonClick("employee")}
-                            >
-                                Nhân viên
-                            </Button>
-                            <Popper
-                                open={open}
-                                anchorEl={anchorRef.current}
-                                placement="bottom-start"
-                                disablePortal
-                                style={{ zIndex: 9999 }}
-                            >
-                                <Box
-                                    sx={{
-                                        bgcolor: "white",
-                                        borderRadius: 1,
-                                        boxShadow: 3,
-                                        minWidth: 180,
-                                    }}
-                                    onMouseEnter={handleMouseEnter}
-                                    onMouseLeave={handleMouseLeave}
-                                >
-                                    <MenuList dense>
-                                        <MenuItem
-                                            onClick={() => handleMenuItemClick("/admin/employee", "employeeList")}
-                                            sx={{
-                                                color: "#000000", // Light pink text for menu items
-                                                backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "transparent", // Slightly translucent light pink for selected
-                                                "&:hover": {
-                                                    backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)", // Translucent light pink on hover for unselected items
-                                                },
-                                            }}
-                                        >
-                                            Nhân viên
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleMenuItemClick("/admin/employee/schedule", "schedule")}
-                                            sx={{
-                                                color: "#000000",
-                                                backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "transparent",
-                                                "&:hover": {
-                                                    backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
-                                                },
-                                            }}
-                                        >
-                                            Lịch làm việc
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleMenuItemClick("/admin/employee/attendance", "attendance")}
-                                            sx={{
-                                                color: "#000000", // Light pink text for menu items
-                                                backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "transparent",
-                                                "&:hover": {
-                                                    backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
-                                                },
-                                            }}
-                                        >
-                                            Chấm công
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleMenuItemClick("/admin/employee/payroll", "payroll")}
-                                            sx={{
-                                                color: "#000000", // Light pink text for menu items
-                                                backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "transparent",
-                                                "&:hover": {
-                                                    backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
-                                                },
-                                            }}
-                                        >
-                                            Bảng tính lương
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleMenuItemClick("/admin/employee/settings", "employeeSettings")}
-                                            sx={{
-                                                color: "#000000", // Light pink text for menu items
-                                                backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "transparent",
-                                                "&:hover": {
-                                                    backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
-                                                },
-                                            }}
-                                        >
-                                            Thiết lập nhân viên
-                                        </MenuItem>
-                                    </MenuList>
-                                </Box>
-                            </Popper>
-                        </Box>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "cashbook")}
-                                component={Link}
-                                to="/admin/cashbook"
-                                onClick={() => handleButtonClick("cashbook")}
-                            >
-                                Sổ quỹ
-                            </Button>
-                        </Box>
-
-                        <Box>
-                            <Button
-                                variant="text"
-                                sx={textButtonSx(activeButton === "reports")}
-                                component={Link}
-                                to="/admin/reports"
-                                onClick={() => handleButtonClick("reports")}
-                            >
-                                Báo cáo
-                            </Button>
-                        </Box>
-                    </Box>
-
+                    Tổng quan
+                </Button>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "rooms")}
+                    component={Link}
+                    to="/admin/rooms"
+                    onClick={() => handleButtonClick("rooms")}
+                >
+                    Phòng
+                </Button>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "goods")}
+                    component={Link}
+                    to="/admin/goods"
+                    onClick={() => handleButtonClick("goods")}
+                >
+                    Hàng hóa
+                </Button>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "transactions")}
+                    component={Link}
+                    to="/admin/transactions"
+                    onClick={() => handleButtonClick("transactions")}
+                >
+                    Giao dịch
+                </Button>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "partners")}
+                    component={Link}
+                    to="/admin/partners"
+                    onClick={() => handleButtonClick("partners")}
+                >
+                    Đối tác
+                </Button>
+                <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: "white",
-                            color: "#007bff",
-                            fontWeight: "bold",
-                            borderRadius: 2,
-                            textTransform: "none",
-                            "&:hover": {
-                                backgroundColor: "#f0f0f0",
-                            },
-                        }}
-                        startIcon={<KeyboardArrowDownIcon />}
-                        onClick={() => navigate('/employees')}
+                        variant="text"
+                        sx={textButtonSx(activeButton === "employee")}
+                        ref={anchorRef}
+                        onClick={() => handleButtonClick("employee")}
                     >
-                        Lễ tân
+                        Nhân viên
                     </Button>
-                </nav>
-            </section>
-
+                    <Popper
+                        open={open}
+                        anchorEl={anchorRef.current}
+                        placement="bottom-start"
+                        disablePortal
+                        style={{ zIndex: 9999 }}
+                    >
+                        <Box
+                            sx={{
+                                bgcolor: "white",
+                                borderRadius: 1,
+                                boxShadow: 3,
+                                minWidth: 180,
+                            }}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <MenuList dense>
+                                <MenuItem
+                                    onClick={() => handleMenuItemClick("/admin/employee", "employeeList")}
+                                    sx={{
+                                        color: "#000000",
+                                        backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: selectedMenuItem === "employeeList" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                        },
+                                    }}
+                                >
+                                    Nhân viên
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => handleMenuItemClick("/admin/employee/schedule", "schedule")}
+                                    sx={{
+                                        color: "#000000",
+                                        backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: selectedMenuItem === "schedule" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                        },
+                                    }}
+                                >
+                                    Lịch làm việc
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => handleMenuItemClick("/admin/employee/attendance", "attendance")}
+                                    sx={{
+                                        color: "#000000",
+                                        backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: selectedMenuItem === "attendance" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                        },
+                                    }}
+                                >
+                                    Chấm công
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => handleMenuItemClick("/admin/employee/payroll", "payroll")}
+                                    sx={{
+                                        color: "#000000",
+                                        backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: selectedMenuItem === "payroll" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                        },
+                                    }}
+                                >
+                                    Bảng tính lương
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => handleMenuItemClick("/admin/employee/settings", "employeeSettings")}
+                                    sx={{
+                                        color: "#000000",
+                                        backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: selectedMenuItem === "employeeSettings" ? "rgba(255, 182, 193, 0.5)" : "rgba(255, 182, 193, 0.3)",
+                                        },
+                                    }}
+                                >
+                                    Thiết lập nhân viên
+                                </MenuItem>
+                            </MenuList>
+                        </Box>
+                    </Popper>
+                </Box>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "cashbook")}
+                    component={Link}
+                    to="/admin/cashbook"
+                    onClick={() => handleButtonClick("cashbook")}
+                >
+                    Sổ quỹ
+                </Button>
+                <Button
+                    variant="text"
+                    sx={textButtonSx(activeButton === "reports")}
+                    component={Link}
+                    to="/admin/reports"
+                    onClick={() => handleButtonClick("reports")}
+                >
+                    Báo cáo
+                </Button>
+            </nav>
+        </section>
     );
 }
+
 export default Nav;
