@@ -1,11 +1,10 @@
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import { Typography } from "@mui/material";
-import { LayoutAdmin } from "../../layouts/admin/home/index.jsx";
-import { LayoutEmployee } from "../../layouts/employee/index.jsx";
-import Overview from "../../pages/admin/overview/index.jsx";
-import Room from "../../pages/admin/room/index.jsx";
-import Employee from "../../pages/admin/employee/index.jsx";
-
+import { LayoutAdmin } from "../layouts/admin/home/index.jsx";
+import { LayoutEmployee } from "../layouts/employee/home/index.jsx";
+import Overview from "../pages/admin/overview/index.jsx";
+import Room from "../pages/admin/room/index.jsx";
+import Employee from "../pages/admin/employee/index.jsx";
 
 const OverviewContent = () => (
     <section style={{ padding: "20px" }}>
@@ -106,9 +105,31 @@ const ReportsContent = () => (
     </section>
 );
 
-function RoutersAdmin() {
+
+// xử lý giao diện employee
+
+const Bookings = () => (
+    <Typography variant="h5" gutterBottom>
+        Trang Lịch đặt phòng
+    </Typography>
+);
+
+const Invoices = () => (
+    <Typography variant="h5" gutterBottom>
+        Trang Hóa đơn bán lẻ
+    </Typography>
+);
+
+const Pending = () => (
+    <Typography variant="h5" gutterBottom>
+        Chờ xác nhận
+    </Typography>
+);
+
+function Routers() {
     return (
         <Routes>
+            {/*admin*/}
             <Route path="/admin" element={<LayoutAdmin />}>
                 <Route index element={<OverviewContent />} />
                 <Route path="rooms" element={<RoomsContent />} />
@@ -123,9 +144,17 @@ function RoutersAdmin() {
                 <Route path="cashbook" element={<CashbookContent />} />
                 <Route path="reports" element={<ReportsContent />} />
             </Route>
-            <Route path="/employee" element={<LayoutEmployee />} />
+
+            {/*employee*/}
+            <Route path="/employee" element={<LayoutEmployee />}>
+                <Route index element={<Bookings />} />
+                <Route path="bookings" element={<Bookings />} />
+                <Route path="invoices" element={<Invoices />} />
+                <Route path="pending" element={<Pending />} />
+            </Route>
+
         </Routes>
     );
 }
 
-export default RoutersAdmin;
+export default Routers;
