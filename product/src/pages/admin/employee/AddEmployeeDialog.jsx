@@ -11,7 +11,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useFormik } from "formik";
 
-function AddEmployeeDialog({ open, onClose, isEditMode }) {
+function AddEmployeeDialog({ open, onClose, isEditMode, employeeData }) {
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
         clipPath: 'inset(50%)',
@@ -43,39 +43,42 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
 
     const [provinces] = useState(mockProvinces);
     const [districts, setDistricts] = useState([]);
+    const [imagePreview, setImagePreview] = useState(null);
 
-    // Dữ liệu ảo của userId
+    // Dữ liệu tài khoản
     const [accounts, setAccounts] = useState([]);
     useEffect(() => {
         const mockAccounts = [
-            { id: 1, name: "Tài khoản 1" },
-            { id: 2, name: "Tài khoản 2" },
-            { id: 3, name: "Tài khoản 3" },
+            { id: "NV001", name: "Tài khoản 1" },
+            { id: "TP002", name: "Tài khoản 2" },
+            { id: "NV003", name: "Tài khoản 3" },
         ];
         setAccounts(mockAccounts);
     }, []);
 
-    // Sử dụng Formik để quản lý dữ liệu form, khởi tạo rỗng để người dùng nhập mới
+    // Sử dụng Formik để quản lý dữ liệu form
     const formik = useFormik({
         initialValues: {
-            userId: "",
-            fullName: "",
-            phone: "",
-            startDate: "",
-            department: "",
-            position: "",
-            note: "",
-            idCard: "",
-            dob: "",
-            gender: "",
-            address: "",
-            province: "",
-            district: "",
-            email: "",
-            method: "",
+            userId: employeeData?.userId || "",
+            fullName: employeeData?.fullName || "",
+            phone: employeeData?.phone || "",
+            startDate: employeeData?.startDate || "",
+            department: employeeData?.department || "",
+            position: employeeData?.position || "",
+            note: employeeData?.note || "",
+            idCard: employeeData?.idCard || "",
+            dob: employeeData?.dob || "",
+            gender: employeeData?.gender || "",
+            address: employeeData?.address || "",
+            province: employeeData?.province || "",
+            district: employeeData?.district || "",
+            email: employeeData?.email || "",
+            method: employeeData?.method || "",
+            image: employeeData?.image || "",
         },
+        enableReinitialize: true,
         onSubmit: (values) => {
-            console.log("Dữ liệu nhân viên mới:", values);
+            console.log("Dữ liệu nhân viên:", { ...values, image: imagePreview });
             alert("Dữ liệu đã được in ra console. Vui lòng kiểm tra!");
         },
     });
@@ -93,8 +96,27 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
         }
     }, [formik.values.province]);
 
+    // Cập nhật imagePreview khi employeeData thay đổi
+    useEffect(() => {
+        if (isEditMode && employeeData?.image) {
+            setImagePreview(employeeData.image);
+        } else {
+            setImagePreview(null);
+        }
+    }, [isEditMode, employeeData]);
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setImagePreview(imageUrl);
+            formik.setFieldValue('image', imageUrl);
+        }
+    };
+
     const handleClose = () => {
         formik.resetForm();
+        setImagePreview(null);
         onClose();
     };
 
@@ -161,11 +183,24 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                                 mt: 3,
                                 backgroundColor: '#f5f5f5',
                                 borderRadius: '8px',
+                                overflow: 'hidden',
                             }}
                         >
-                            <IconButton>
-                                <CameraAltIcon sx={{ color: '#999' }} />
-                            </IconButton>
+                            {imagePreview ? (
+                                <img
+                                    src={imagePreview}
+                                    alt="Employee"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                    }}
+                                />
+                            ) : (
+                                <IconButton>
+                                    <CameraAltIcon sx={{ color: '#999' }} />
+                                </IconButton>
+                            )}
                         </Box>
                         <Button
                             component="label"
@@ -178,7 +213,8 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                             Upload files
                             <VisuallyHiddenInput
                                 type="file"
-                                onChange={(event) => console.log(event.target.files)}
+                                accept="image/*"
+                                onChange={handleImageUpload}
                                 multiple
                             />
                         </Button>
@@ -393,7 +429,10 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                                                         variant="outlined"
                                                         name="userId"
                                                         value={formik.values.userId}
-                                                        onChange={formik.handleChange}
+                                                        onChange={(e) => {
+                                                            console.log("Đã chọn tài khoản:", e.target.value);
+                                                            formik.handleChange(e);
+                                                        }}
                                                         disabled={isEditMode}
                                                         sx={{
                                                             borderRadius: '8px',
@@ -424,6 +463,11 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                                                     +
                                                 </Button>
                                             </Box>
+                                            {accounts.length === 0 && (
+                                                <Typography color="error" sx={{ fontSize: 12, mt: 1 }}>
+                                                    Không có tài khoản nào để chọn.
+                                                </Typography>
+                                            )}
                                         </Grid>
                                     </Grid>
                                 </Grid>

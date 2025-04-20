@@ -43,19 +43,20 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
 
     const [provinces] = useState(mockProvinces);
     const [districts, setDistricts] = useState([]);
+    const [imagePreview, setImagePreview] = useState(null);
 
-    // Dữ liệu ảo của userId
+    // Dữ liệu tài khoản
     const [accounts, setAccounts] = useState([]);
     useEffect(() => {
         const mockAccounts = [
-            { id: 1, name: "Tài khoản 1" },
-            { id: 2, name: "Tài khoản 2" },
-            { id: 3, name: "Tài khoản 3" },
+            { id: "NV001", name: "Tài khoản 1" },
+            { id: "TP002", name: "Tài khoản 2" },
+            { id: "NV003", name: "Tài khoản 3" },
         ];
         setAccounts(mockAccounts);
     }, []);
 
-    // Sử dụng Formik để quản lý dữ liệu form, khởi tạo với dữ liệu nhân viên
+    // Sử dụng Formik để quản lý dữ liệu form
     const formik = useFormik({
         initialValues: {
             userId: employeeData?.userId || "",
@@ -73,10 +74,11 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
             district: employeeData?.district || "",
             email: employeeData?.email || "",
             method: employeeData?.method || "",
+            image: employeeData?.image || "",
         },
-        enableReinitialize: true, // Cho phép Formik cập nhật initialValues khi employeeData thay đổi
+        enableReinitialize: true,
         onSubmit: (values) => {
-            console.log("Dữ liệu nhân viên đã chỉnh sửa:", values);
+            console.log("Dữ liệu nhân viên đã chỉnh sửa:", { ...values, image: imagePreview });
             alert("Dữ liệu đã được in ra console. Vui lòng kiểm tra!");
         },
     });
@@ -94,8 +96,27 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
         }
     }, [formik.values.province]);
 
+    // Cập nhật imagePreview khi employeeData thay đổi
+    useEffect(() => {
+        if (employeeData?.image) {
+            setImagePreview(employeeData.image);
+        } else {
+            setImagePreview(null);
+        }
+    }, [employeeData]);
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setImagePreview(imageUrl);
+            formik.setFieldValue('image', imageUrl);
+        }
+    };
+
     const handleClose = () => {
         formik.resetForm();
+        setImagePreview(null);
         onClose();
     };
 
@@ -162,11 +183,24 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
                                 mt: 3,
                                 backgroundColor: '#f5f5f5',
                                 borderRadius: '8px',
+                                overflow: 'hidden',
                             }}
                         >
-                            <IconButton>
-                                <CameraAltIcon sx={{ color: '#999' }} />
-                            </IconButton>
+                            {imagePreview ? (
+                                <img
+                                    src={imagePreview}
+                                    alt="Employee"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                    }}
+                                />
+                            ) : (
+                                <IconButton>
+                                    <CameraAltIcon sx={{ color: '#999' }} />
+                                </IconButton>
+                            )}
                         </Box>
                         <Button
                             component="label"
@@ -179,7 +213,8 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
                             Upload files
                             <VisuallyHiddenInput
                                 type="file"
-                                onChange={(event) => console.log(event.target.files)}
+                                accept="image/*"
+                                onChange={handleImageUpload}
                                 multiple
                             />
                         </Button>
@@ -394,8 +429,11 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
                                                         variant="outlined"
                                                         name="userId"
                                                         value={formik.values.userId}
-                                                        onChange={formik.handleChange}
-                                                        disabled={true} // Vô hiệu hóa vì đang ở chế độ chỉnh sửa
+                                                        onChange={(e) => {
+                                                            console.log("Đã chọn tài khoản:", e.target.value);
+                                                            formik.handleChange(e);
+                                                        }}
+                                                        disabled={false} // Cho phép chọn tài khoản
                                                         sx={{
                                                             borderRadius: '8px',
                                                             backgroundColor: '#f5f5f5',
@@ -425,6 +463,11 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
                                                     +
                                                 </Button>
                                             </Box>
+                                            {accounts.length === 0 && (
+                                                <Typography color="error" sx={{ fontSize: 12, mt: 1 }}>
+                                                    Không có tài khoản nào để chọn.
+                                                </Typography>
+                                            )}
                                         </Grid>
                                     </Grid>
                                 </Grid>

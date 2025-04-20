@@ -567,7 +567,7 @@ function Employee() {
                 <EditEmployeeDialog
                     open={openEditDialog}
                     onClose={handleCloseEditDialog}
-                    employeeData={selectedEmployee} // Truyền dữ liệu nhân viên được chọn
+                    employeeData={selectedEmployee}
                     fetchAllEmployees={() => fetchAllEmployees(page, size)}
                 />
 
