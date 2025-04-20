@@ -29,7 +29,6 @@ export function LayoutEmployee() {
             <Box
                 sx={{
                     flexGrow: 1,
-                    padding: "20px",
                     backgroundColor: "#f5f5f5",
                 }}
             >
