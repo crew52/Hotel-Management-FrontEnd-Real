@@ -5,7 +5,7 @@ import { LayoutEmployee } from "../layouts/employee/home/index.jsx";
 import Overview from "../pages/admin/overview/index.jsx";
 import Room from "../pages/admin/room/index.jsx";
 import Employee from "../pages/admin/employee/index.jsx";
-import RoomBooking from "../pages/employee/roomBooking/index.jsx";
+import RoomBookingView from "../pages/employee/roomBooking/RoomBookingView.jsx";
 
 const OverviewContent = () => (
     <section style={{ padding: "20px" }}>
@@ -108,7 +108,7 @@ const ReportsContent = () => (
 // xử lý giao diện employee
 
 const Bookings = () => (
-   <RoomBooking/>
+   <RoomBookingView/>
 );
 
 const Invoices = () => (
