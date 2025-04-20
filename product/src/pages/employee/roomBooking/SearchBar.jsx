@@ -9,18 +9,20 @@ import Button from '@mui/material/Button';
 export default function SearchBar({ searchValue, onSearchChange, anchorEl, onSearchClick, onSearchClose }) {
     return (
         <>
-            <Search sx={{ width: '400px' }}>
-                <SearchIconWrapper>
-                    <SearchIcon sx={{ color: '#666', fontSize: '1.2rem' }} />
-                </SearchIconWrapper>
-                <StyledInputBase
-                    placeholder="Tìm kiếm khách hàng, mã đặt phòng..."
-                    inputProps={{ 'aria-label': 'search' }}
-                    value={searchValue}
-                    onChange={onSearchChange}
-                    onClick={onSearchClick}
-                />
-            </Search>
+            <Box sx={{ width: '25%' }}>
+                <Search sx={{ width: '90%', backgroundColor: 'white' }}>
+                    <SearchIconWrapper>
+                        <SearchIcon sx={{ color: '#3c3c3c', fontSize: '1.2rem' }} />
+                    </SearchIconWrapper>
+                    <StyledInputBase
+                        placeholder="Tìm kiếm khách hàng, mã đặt phòng..."
+                        inputProps={{ 'aria-label': 'search' }}
+                        value={searchValue}
+                        onChange={onSearchChange}
+                        onClick={onSearchClick}
+                    />
+                </Search>
+            </Box>
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
