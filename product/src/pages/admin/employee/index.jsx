@@ -193,7 +193,7 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
                                     variant="contained"
                                     size="small"
                                     sx={{ backgroundColor: '#00c853', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}
-                                    onClick={() => handleOpenEditDialog(row)} // Gọi hàm mở dialog và truyền dữ liệu nhân viên
+                                    onClick={() => handleOpenEditDialog(row)}
                                 >
                                     Cập nhật
                                 </Button>
@@ -217,7 +217,9 @@ function Employee() {
         'Số CMND/CCCD', 'Địa chỉ', 'Chức vụ', 'Ghi chú'
     ]);
     const [selectedRows, setSelectedRows] = useState([]);
-    const [employees, setEmployees] = useState(mockEmployees);
+    const [employees, setEmployees] = useState([]);
+    const [filteredEmployees, setFilteredEmployees] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
     const [openDialog, setOpenDialog] = useState(false);
@@ -226,8 +228,8 @@ function Employee() {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
     const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false); // Thêm trạng thái cho Edit dialog
-    const [selectedEmployee, setSelectedEmployee] = useState(null); // Thêm trạng thái để lưu nhân viên được chọn
+    const [openEditDialog, setOpenEditDialog] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     const columnOptions = [
         { label: 'Ảnh', key: 'image' },
@@ -253,11 +255,60 @@ function Employee() {
     ];
 
     // Lấy dữ liệu từ API hoặc fallback về dữ liệu ảo
+    const fetchEmployees = async (page, size) => {
+        try {
+            const res = await EmployeeService.getAllEmployee(page, size);
+            const employeesData = res.data.content.map(emp => ({
+                id: emp.id,
+                fullName: emp.fullName,
+                phone: emp.phone,
+                idCard: emp.idCard,
+                address: emp.address,
+                position: emp.position,
+                note: emp.note,
+                user_id: emp.user?.userId || '',
+                start_date: emp.startDate,
+                device: emp.device || '-',
+                dob: emp.dob,
+                gender: emp.gender,
+                email: emp.email,
+                facebook: emp.facebook || '-',
+                branch: emp.branch,
+                work_branch: emp.workBranch || emp.branch,
+                department: emp.department,
+                login_account: emp.loginAccount || '-',
+                image: emp.imgUrl
+            }));
+            setEmployees(employeesData);
+            setFilteredEmployees(employeesData);
+        } catch (error) {
+            setEmployees(mockEmployees);
+            setFilteredEmployees(mockEmployees);
+            setSnackbarMessage('Lấy danh sách nhân viên thất bại! Sử dụng dữ liệu ảo.');
+            setSnackbarSeverity('warning');
+            setOpenSnackbar(true);
+        }
+    };
+
+    // Gọi API lần đầu khi component mount
     useEffect(() => {
-        const fetchEmployees = async () => {
+        fetchEmployees(page, size);
+    }, [page, size]);
+
+    // Xử lý tìm kiếm
+    useEffect(() => {
+        const handleSearch = async () => {
+            if (!searchTerm.trim()) {
+                // Nếu không có từ khóa tìm kiếm, hiển thị danh sách phân trang
+                fetchEmployees(page, size);
+                return;
+            }
+
             try {
-                const res = await EmployeeService.getAllEmployee(page, size);
-                const employees = res.data.content.map(emp => ({
+                // Gọi API tìm kiếm theo tên
+                const res = await EmployeeService.searchEmployees(searchTerm);
+
+                const employeesData = res.data.map(emp => ({
                     id: emp.id,
                     fullName: emp.fullName,
                     phone: emp.phone,
@@ -278,16 +329,32 @@ function Employee() {
                     login_account: emp.loginAccount || '-',
                     image: emp.imgUrl
                 }));
-                setEmployees(employees);
+                if (employeesData.length > 0) {
+                    setFilteredEmployees(employeesData);
+                } else {
+                    // Nếu API không trả về kết quả, tìm kiếm trên dữ liệu ảo
+                    const filtered = mockEmployees.filter((emp) =>
+                        emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    setFilteredEmployees(filtered);
+                    setSnackbarMessage('Không tìm thấy nhân viên qua API, sử dụng dữ liệu ảo.');
+                    setSnackbarSeverity('info');
+                    setOpenSnackbar(true);
+                }
             } catch (error) {
-                setEmployees(mockEmployees);
-                setSnackbarMessage('Lấy danh sách nhân viên thất bại! Sử dụng dữ liệu ảo.');
+                // Nếu API lỗi, tìm kiếm trên dữ liệu ảo
+                const filtered = mockEmployees.filter((emp) =>
+                    emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setFilteredEmployees(filtered);
+                setSnackbarMessage('Lỗi khi tìm kiếm qua API, sử dụng dữ liệu ảo.');
                 setSnackbarSeverity('warning');
                 setOpenSnackbar(true);
             }
         };
-        fetchEmployees();
-    }, [page, size]);
+
+        handleSearch();
+    }, [searchTerm]);
 
     const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
@@ -318,6 +385,7 @@ function Employee() {
         try {
             await Promise.all(selectedRows.map(id => EmployeeService.deleteEmployee(id)));
             setEmployees((prev) => prev.filter((emp) => !selectedRows.includes(emp.id)));
+            setFilteredEmployees((prev) => prev.filter((emp) => !selectedRows.includes(emp.id)));
             setSelectedRows([]);
             setSnackbarMessage('Xóa nhân viên thành công!');
             setSnackbarSeverity('success');
@@ -351,39 +419,6 @@ function Employee() {
     const handleCloseEditDialog = () => {
         setOpenEditDialog(false);
         setSelectedEmployee(null);
-    };
-
-    const fetchAllEmployees = async (page, size) => {
-        try {
-            const res = await EmployeeService.getAllEmployee(page, size);
-            const employees = res.data.content.map(emp => ({
-                id: emp.id,
-                fullName: emp.fullName,
-                phone: emp.phone,
-                idCard: emp.idCard,
-                address: emp.address,
-                position: emp.position,
-                note: emp.note,
-                user_id: emp.user?.userId || '',
-                start_date: emp.startDate,
-                device: emp.device || '-',
-                dob: emp.dob,
-                gender: emp.gender,
-                email: emp.email,
-                facebook: emp.facebook || '-',
-                branch: emp.branch,
-                work_branch: emp.workBranch || emp.branch,
-                department: emp.department,
-                login_account: emp.loginAccount || '-',
-                image: emp.imgUrl
-            }));
-            setEmployees(employees);
-        } catch (error) {
-            setEmployees(mockEmployees);
-            setSnackbarMessage('Lấy danh sách nhân viên thất bại! Sử dụng dữ liệu ảo.');
-            setSnackbarSeverity('warning');
-            setOpenSnackbar(true);
-        }
     };
 
     return (
@@ -454,7 +489,13 @@ function Employee() {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mt: 1.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', width: 420, height: 26, border: '1px solid #e0e0e0', borderRadius: '6px', px: 1.5, py: 0.5, mt: 1, ml: 2, backgroundColor: '#ffffff', boxShadow: 1 }}>
                         <SearchIcon sx={{ fontSize: 20, color: 'gray', mr: 1 }} />
-                        <InputBase placeholder="Tìm theo mã chấm công, tên nhân viên" sx={{ fontSize: 14, flex: 1 }} inputProps={{ 'aria-label': 'search employee' }} />
+                        <InputBase
+                            placeholder="Tìm theo mã chấm công, tên nhân viên"
+                            sx={{ fontSize: 14, flex: 1 }}
+                            inputProps={{ 'aria-label': 'search employee' }}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </Box>
                     {selectedRows.length > 0 && (
                         <>
@@ -533,14 +574,14 @@ function Employee() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {employees.map((employee) => (
+                                {filteredEmployees.map((employee) => (
                                     <Row
                                         key={employee.id}
                                         row={employee}
                                         selectedRows={selectedRows}
                                         handleRowSelect={handleRowSelect}
                                         selectedColumns={selectedColumns}
-                                        handleOpenEditDialog={handleOpenEditDialog} // Truyền hàm mở dialog vào Row
+                                        handleOpenEditDialog={handleOpenEditDialog}
                                     />
                                 ))}
                             </TableBody>
@@ -560,7 +601,7 @@ function Employee() {
                 <AddEmployeeDialog
                     open={openAddDialog}
                     onClose={handleCloseAddDialog}
-                    fetchAllEmployees={() => fetchAllEmployees(page, size)}
+                    fetchAllEmployees={() => fetchEmployees(page, size)}
                     employee={selectedEmployee}
                 />
 
@@ -568,7 +609,7 @@ function Employee() {
                     open={openEditDialog}
                     onClose={handleCloseEditDialog}
                     employeeData={selectedEmployee}
-                    fetchAllEmployees={() => fetchAllEmployees(page, size)}
+                    fetchAllEmployees={() => fetchEmployees(page, size)}
                 />
 
                 <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
