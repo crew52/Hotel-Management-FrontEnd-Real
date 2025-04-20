@@ -11,7 +11,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useFormik } from "formik";
 
-function AddEmployeeDialog({ open, onClose, isEditMode }) {
+function EditEmployeeDialog({ open, onClose, employeeData }) {
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
         clipPath: 'inset(50%)',
@@ -55,27 +55,28 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
         setAccounts(mockAccounts);
     }, []);
 
-    // Sử dụng Formik để quản lý dữ liệu form, khởi tạo rỗng để người dùng nhập mới
+    // Sử dụng Formik để quản lý dữ liệu form, khởi tạo với dữ liệu nhân viên
     const formik = useFormik({
         initialValues: {
-            userId: "",
-            fullName: "",
-            phone: "",
-            startDate: "",
-            department: "",
-            position: "",
-            note: "",
-            idCard: "",
-            dob: "",
-            gender: "",
-            address: "",
-            province: "",
-            district: "",
-            email: "",
-            method: "",
+            userId: employeeData?.userId || "",
+            fullName: employeeData?.fullName || "",
+            phone: employeeData?.phone || "",
+            startDate: employeeData?.startDate || "",
+            department: employeeData?.department || "",
+            position: employeeData?.position || "",
+            note: employeeData?.note || "",
+            idCard: employeeData?.idCard || "",
+            dob: employeeData?.dob || "",
+            gender: employeeData?.gender || "",
+            address: employeeData?.address || "",
+            province: employeeData?.province || "",
+            district: employeeData?.district || "",
+            email: employeeData?.email || "",
+            method: employeeData?.method || "",
         },
+        enableReinitialize: true, // Cho phép Formik cập nhật initialValues khi employeeData thay đổi
         onSubmit: (values) => {
-            console.log("Dữ liệu nhân viên mới:", values);
+            console.log("Dữ liệu nhân viên đã chỉnh sửa:", values);
             alert("Dữ liệu đã được in ra console. Vui lòng kiểm tra!");
         },
     });
@@ -130,7 +131,7 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
             }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography sx={{ fontSize: 16, fontWeight: 'bold', color: '#333' }} variant="h6">
-                        {isEditMode ? "Chỉnh sửa nhân viên" : "Thêm mới nhân viên"}
+                        Chỉnh sửa nhân viên
                     </Typography>
                     <IconButton
                         aria-label="close"
@@ -394,7 +395,7 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                                                         name="userId"
                                                         value={formik.values.userId}
                                                         onChange={formik.handleChange}
-                                                        disabled={isEditMode}
+                                                        disabled={true} // Vô hiệu hóa vì đang ở chế độ chỉnh sửa
                                                         sx={{
                                                             borderRadius: '8px',
                                                             backgroundColor: '#f5f5f5',
@@ -734,7 +735,7 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
                     sx={{ textTransform: 'none', mr: 1, borderRadius: '8px' }}
                     onClick={formik.handleSubmit}
                 >
-                    {isEditMode ? "Cập nhật" : "Lưu"}
+                    Cập nhật
                 </Button>
                 <Button
                     variant="outlined"
@@ -749,4 +750,4 @@ function AddEmployeeDialog({ open, onClose, isEditMode }) {
     );
 }
 
-export default AddEmployeeDialog;
+export default EditEmployeeDialog;

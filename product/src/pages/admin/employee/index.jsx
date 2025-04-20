@@ -15,6 +15,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EmployeeService from "../../../service/admin/employee.service.js";
 import AddEmployeeDialog from "./AddEmployeeDialog.jsx";
+import EditEmployeeDialog from "./EditEmployeeDialog.jsx";
 
 // Hàm tạo dữ liệu nhân viên
 function createEmployeeData(
@@ -62,7 +63,7 @@ const mockEmployees = [
 ];
 
 // Component Row hiển thị từng hàng nhân viên
-function Row({ row, selectedRows, handleRowSelect, selectedColumns }) {
+function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEditDialog }) {
     const [open, setOpen] = useState(false);
 
     const columnOptions = [
@@ -188,7 +189,12 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns }) {
                                 <Button variant="contained" size="small" sx={{ backgroundColor: '#1976d2', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}>
                                     Lấy mã xác nhận
                                 </Button>
-                                <Button variant="contained" size="small" sx={{ backgroundColor: '#00c853', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}>
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    sx={{ backgroundColor: '#00c853', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}
+                                    onClick={() => handleOpenEditDialog(row)} // Gọi hàm mở dialog và truyền dữ liệu nhân viên
+                                >
                                     Cập nhật
                                 </Button>
                                 <Button variant="contained" size="small" sx={{ backgroundColor: '#d32f2f', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}>
@@ -219,7 +225,9 @@ function Employee() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [openEditDialog, setOpenEditDialog] = useState(false); // Thêm trạng thái cho Edit dialog
+    const [selectedEmployee, setSelectedEmployee] = useState(null); // Thêm trạng thái để lưu nhân viên được chọn
 
     const columnOptions = [
         { label: 'Ảnh', key: 'image' },
@@ -324,21 +332,59 @@ function Employee() {
     };
 
     const handleSnackbarClose = () => setOpenSnackbar(false);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-
 
     const handleOpenAddDialog = () => {
         setSelectedEmployee(null);
         setOpenAddDialog(true);
     };
 
-
     const handleCloseAddDialog = () => {
         setOpenAddDialog(false);
         setSelectedEmployee(null);
     };
 
+    const handleOpenEditDialog = (employee) => {
+        setSelectedEmployee(employee);
+        setOpenEditDialog(true);
+    };
+
+    const handleCloseEditDialog = () => {
+        setOpenEditDialog(false);
+        setSelectedEmployee(null);
+    };
+
+    const fetchAllEmployees = async (page, size) => {
+        try {
+            const res = await EmployeeService.getAllEmployee(page, size);
+            const employees = res.data.content.map(emp => ({
+                id: emp.id,
+                fullName: emp.fullName,
+                phone: emp.phone,
+                idCard: emp.idCard,
+                address: emp.address,
+                position: emp.position,
+                note: emp.note,
+                user_id: emp.user?.userId || '',
+                start_date: emp.startDate,
+                device: emp.device || '-',
+                dob: emp.dob,
+                gender: emp.gender,
+                email: emp.email,
+                facebook: emp.facebook || '-',
+                branch: emp.branch,
+                work_branch: emp.workBranch || emp.branch,
+                department: emp.department,
+                login_account: emp.loginAccount || '-',
+                image: emp.imgUrl
+            }));
+            setEmployees(employees);
+        } catch (error) {
+            setEmployees(mockEmployees);
+            setSnackbarMessage('Lấy danh sách nhân viên thất bại! Sử dụng dữ liệu ảo.');
+            setSnackbarSeverity('warning');
+            setOpenSnackbar(true);
+        }
+    };
 
     return (
         <Grid container spacing={0.5}>
@@ -488,7 +534,14 @@ function Employee() {
                             </TableHead>
                             <TableBody>
                                 {employees.map((employee) => (
-                                    <Row key={employee.id} row={employee} selectedRows={selectedRows} handleRowSelect={handleRowSelect} selectedColumns={selectedColumns} />
+                                    <Row
+                                        key={employee.id}
+                                        row={employee}
+                                        selectedRows={selectedRows}
+                                        handleRowSelect={handleRowSelect}
+                                        selectedColumns={selectedColumns}
+                                        handleOpenEditDialog={handleOpenEditDialog} // Truyền hàm mở dialog vào Row
+                                    />
                                 ))}
                             </TableBody>
                         </Table>
@@ -509,6 +562,13 @@ function Employee() {
                     onClose={handleCloseAddDialog}
                     fetchAllEmployees={() => fetchAllEmployees(page, size)}
                     employee={selectedEmployee}
+                />
+
+                <EditEmployeeDialog
+                    open={openEditDialog}
+                    onClose={handleCloseEditDialog}
+                    employeeData={selectedEmployee} // Truyền dữ liệu nhân viên được chọn
+                    fetchAllEmployees={() => fetchAllEmployees(page, size)}
                 />
 
                 <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
