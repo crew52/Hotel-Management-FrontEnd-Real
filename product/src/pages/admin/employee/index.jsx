@@ -14,6 +14,7 @@ import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EmployeeService from "../../../service/admin/employee.service.js";
+import AddEmployeeDialog from "./AddEmployeeDialog.jsx";
 
 // Hàm tạo dữ liệu nhân viên
 function createEmployeeData(
@@ -219,6 +220,7 @@ function Employee() {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
+
     const columnOptions = [
         { label: 'Ảnh', key: 'image' },
         { label: 'Mã nhân viên', key: 'id' },
@@ -322,6 +324,21 @@ function Employee() {
     };
 
     const handleSnackbarClose = () => setOpenSnackbar(false);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+
+
+    const handleOpenAddDialog = () => {
+        setSelectedEmployee(null);
+        setOpenAddDialog(true);
+    };
+
+
+    const handleCloseAddDialog = () => {
+        setOpenAddDialog(false);
+        setSelectedEmployee(null);
+    };
+
 
     return (
         <Grid container spacing={0.5}>
@@ -411,7 +428,12 @@ function Employee() {
                     )}
 
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button variant="contained" startIcon={<AddIcon sx={{ fontSize: '16px' }} />} size="small" sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon sx={{ fontSize: '16px' }} />}
+                            size="small"
+                            sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}
+                            onClick={handleOpenAddDialog}>
                             Nhân viên
                         </Button>
                         <Button variant="contained" startIcon={<UploadFileIcon sx={{ fontSize: '16px' }} />} size="small" sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '4px 8px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}>
@@ -481,6 +503,13 @@ function Employee() {
                         <Button onClick={confirmDelete} color="error">Xóa</Button>
                     </DialogActions>
                 </Dialog>
+
+                <AddEmployeeDialog
+                    open={openAddDialog}
+                    onClose={handleCloseAddDialog}
+                    fetchAllEmployees={() => fetchAllEmployees(page, size)}
+                    employee={selectedEmployee}
+                />
 
                 <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
                     <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>{snackbarMessage}</Alert>
