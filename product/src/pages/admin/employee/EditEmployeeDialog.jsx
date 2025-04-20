@@ -597,7 +597,7 @@ function EditEmployeeDialog({ open, onClose, employeeData }) {
                                                 name="gender"
                                                 value={formik.values.gender}
                                                 onChange={formik.handleChange}
-                                                sx={{ columnGap: 4 }}
+                                                sx={{ columnGap: 4, ml:9 }}
                                             >
                                                 <FormControlLabel value="MALE" control={<Radio size="small" />} label="Nam" />
                                                 <FormControlLabel value="FEMALE" control={<Radio size="small" />} label="Nữ" />
