@@ -18,6 +18,7 @@ import {
     MenuItem,
     Grid,
     InputAdornment,
+    Input,
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventIcon from '@mui/icons-material/Event';
@@ -528,10 +529,10 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
 
                         <Box sx={{
                             p: 1,
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: '#e9f5ee',
                             borderRadius: 1,
                         }}>
-                            <Grid container spacing={10}>
+                            <Grid container spacing={1}>
                                 <Grid item xs={1.33}>
                                     <Box sx={{ textAlign: 'center' }}>
                                         <Typography
@@ -545,11 +546,11 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                     </Box>
                                 </Grid>
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' ,ml:8 }}>
+                                    <Box sx={{ textAlign: 'center' ,ml:14 }}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
-                                                color: '#4CAF50', // Làm nổi bật "Phòng 1"
+                                                color: '#4CAF50',
                                             }}
                                         >
                                             Phòng 1
@@ -557,7 +558,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                     </Box>
                                 </Grid>
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' }}>
+                                    <Box sx={{ textAlign: 'center',ml:7 }}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
@@ -569,7 +570,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                     </Box>
                                 </Grid>
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' }}>
+                                    <Box sx={{ textAlign: 'center' ,ml:5}}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
@@ -582,7 +583,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                 </Grid>
 
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' }}>
+                                    <Box sx={{ textAlign: 'center',ml:22 }}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
@@ -594,7 +595,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                     </Box>
                                 </Grid>
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' }}>
+                                    <Box sx={{ textAlign: 'center' ,ml:37}}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
@@ -606,7 +607,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                     </Box>
                                 </Grid>
                                 <Grid item xs={1.33}>
-                                    <Box sx={{ textAlign: 'center' }}>
+                                    <Box sx={{ textAlign: 'center',ml:5 }}>
                                         <Typography
                                             sx={{
                                                 fontSize: '0.75rem',
@@ -669,7 +670,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                                 <MenuItem value="Giờ"
                                                           sx={{
                                                               fontSize:13,
-                                                               height:32 }}>
+                                                              height:32 }}>
                                                     Giờ</MenuItem>
                                             </Select>
                                         </FormControl>
@@ -745,6 +746,7 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     border: 'none',
+                                                    ml:10,
                                                 },
                                                 '& .MuiInputBase-input': {
                                                     padding: '0 8px',
@@ -763,13 +765,14 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                         />
                                     </Grid>
 
-                                    <Grid item xs={1.33}>
+                                    <Grid item xs={1.33} sx={{ml:4}}>
                                         <TextField
                                             value="180,000"
                                             variant="standard"
                                             sx={{
                                                 '& .MuiInputBase-root': {
                                                     height: '32px',
+                                                    width: 70,
                                                     fontSize: 13,
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -780,13 +783,13 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                                     textAlign: 'right',
                                                 },
                                                 '& .MuiInput-underline:before': {
-                                                    borderBottom: 'none',
+                                                    borderBottom: '1px solid rgba(0, 0, 0, 0.42)',
                                                 },
                                                 '& .MuiInput-underline:after': {
-                                                    borderBottom: 'none',
+                                                    borderBottom: '2px solid #1976d2',
                                                 },
                                                 '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-                                                    borderBottom: 'none',
+                                                    borderBottom: '1px solid rgba(0, 0, 0, 0.87)',
                                                 },
                                             }}
                                         />
@@ -794,94 +797,130 @@ export default function SchematicView({ onBookingOpen, onFilterOpen, onViewModeC
                                 </Grid>
 
                                 {/* Dòng bổ sung: Nút, Ghi chú, và Thông tin thanh toán */}
-                                <Grid item xs={12} container spacing={1}>
-                                    <Grid item xs={12} container spacing={1}>
-                                        <Grid item xs={8} container spacing={1}>
+                                <Grid item xs={12} container spacing={2} sx={{mt:5}}>
+                                     <Grid xs={4} sx={{width:720}}>
+                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                             <Typography sx={{ fontSize: 13, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                                 Ghi chú
+                                             </Typography>
+                                             <TextField
+                                                 fullWidth
+                                                 size="small"
+                                                 placeholder="Nhập ghi chú..."
+                                                 value={note}
+                                                 onChange={(e) => setNote(e.target.value)}
+                                                 sx={{
+                                                     maxWidth: 300,
+                                                     '& .MuiInputBase-input': {
+                                                         fontSize: '0.875rem',
+                                                         height: '32px',
+                                                         padding: '0 10px',
+                                                         display: 'flex',
+                                                         alignItems: 'center',
+                                                     },
+                                                 }}
+                                             />
+                                         </Box>
+                                     </Grid>
 
-                                            <Grid item xs={8}>
-                                                <TextField
-                                                    fullWidth
-                                                    size="small"
-                                                    placeholder="Nhập ghi chú..."
-                                                    value={note}
-                                                    onChange={(e) => setNote(e.target.value)}
-                                                    sx={{
-                                                        '& .MuiInputBase-input': {
-                                                            fontSize: '0.875rem',
-                                                            height: '32px',
-                                                            padding: '0 10px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        },
-                                                    }}
-                                                />
-                                            </Grid>
+                                    <Grid xs={8}>
+                                        <Grid container direction="column" spacing={2}>
+                                            <Box sx={{ backgroundColor: "#f7f8f9", borderRadius: 2, padding: 2, ml: 6, width: 320 }}>
+                                                {/* Khách cần trả */}
+                                                <Grid item>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="textSecondary"
+                                                            sx={{ fontSize: 13, fontWeight: 'bold' }}
+                                                        >
+                                                            Khách cần trả:
+                                                        </Typography>
 
+                                                        <Box sx={{ borderBottom: '1px solid #4caf50', minWidth: 80, textAlign: 'right' }}>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="#4caf50"
+                                                                sx={{ fontWeight: 'bold', fontSize: 13 }}
+                                                            >
+                                                                180,000
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+
+
+                                                <Grid item sx={{ mt: 1 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="textSecondary"
+                                                                sx={{ fontSize: 13, fontWeight: 'bold' }}
+                                                            >
+                                                                Khách thanh toán:
+                                                            </Typography>
+                                                            <Box sx={{
+                                                                backgroundColor: '#e8f5e9',
+                                                                borderRadius: '50%',
+                                                                padding: '4px'
+                                                            }}>
+                                                                <CreditCardIcon fontSize="small" sx={{ color: '#4caf50' }} />
+                                                            </Box>
+                                                        </Box>
+
+
+                                                        <Box sx={{ borderBottom: '1px solid #000', minWidth: 80, textAlign: 'right' }}>
+                                                            <Input
+                                                                defaultValue="0"
+                                                                disableUnderline
+                                                                inputProps={{
+                                                                    style: {
+                                                                        fontSize: 13,
+                                                                        padding: '2px 0',
+                                                                        height: 24,
+                                                                        width:70,
+                                                                        textAlign: 'right',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    width: '100%',
+                                                                }}
+                                                            />
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+                                            </Box>
 
                                         </Grid>
                                     </Grid>
-
-
-                                    <Grid item xs={8}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'flex-end',
-                                            }}
-                                        >
-                                            <Box sx={{ textAlign: 'right' }}>
-                                                <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.875rem' }}>
-                                                    Khách cần trả
-                                                </Typography>
-                                                <Typography variant="h6" color="error" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    {additionalServices.toLocaleString('vi-VN')}đ
-                                                </Typography>
-                                                <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.875rem' }}>
-                                                    Khách thanh toán
-                                                </Typography>
-                                                <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    {customerPayment.toLocaleString('vi-VN')}đ
-                                                    <CreditCardIcon sx={{ fontSize: '1rem', ml: 0.5, verticalAlign: 'middle' }} />
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Grid>
-
                                 </Grid>
                             </Grid>
                         </Box>
 
                         {/* Dòng 4: Nút hành động */}
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 , mb:2 }}>
                             <Button
                                 variant="contained"
                                 sx={{
-                                    fontSize: '0.875rem',
-                                    backgroundColor: '#4CAF50',
-                                    '&:hover': { backgroundColor: '#45A049' }
+                                    fontSize: '14',
+                                    textTransform: 'none',
+                                    backgroundColor: '#279656',
+                                    '&:hover': { backgroundColor: '#1e7c44' }
                                 }}
-                            >
-                                Thêm tùy chọn
-                            </Button>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    fontSize: '0.875rem',
-                                    backgroundColor: '#1976D2',
-                                    '&:hover': { backgroundColor: '#1565C0' }
-                                }}
-                                onClick={() => alert('Chức năng nhận phòng đang phát triển')}
+
                             >
                                 Nhận phòng
                             </Button>
                             <Button
                                 variant="contained"
                                 sx={{
-                                    fontSize: '0.875rem',
-                                    backgroundColor: '#FF6F61',
-                                    '&:hover': { backgroundColor: '#E57373' }
+                                    fontSize: '14',
+                                    textTransform: 'none',
+                                    backgroundColor: '#ffb866',
+                                    '&:hover': { backgroundColor: '#f1ae61' }
                                 }}
-                                onClick={() => alert('Chức năng đặt trước đang phát triển')}
+
                             >
                                 Đặt trước
                             </Button>
