@@ -3,7 +3,7 @@ import {axiosInstance} from "../../configs/axios.config.js";
 
 class EmployeeService {
     static async getAllEmployee(page = 0, size = 10) {
-        return await axiosInstance.get(`api/employees?page=${page}&size=${size}`);
+        return await axiosInstance.get(`/api/employees?page=${page}&size=${size}`);
     }
 
     static async deleteEmployee(id) {

@@ -258,6 +258,7 @@ function Employee() {
     const fetchEmployees = async (page, size) => {
         try {
             const res = await EmployeeService.getAllEmployee(page, size);
+            console.log(res);
             const employeesData = res.data.content.map(emp => ({
                 id: emp.id,
                 fullName: emp.fullName,
