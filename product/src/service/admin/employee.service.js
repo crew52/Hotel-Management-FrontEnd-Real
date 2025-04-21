@@ -1,12 +1,13 @@
-import { axiosInstance } from "../configs/axios.config.js";
+import {axiosInstance} from "../../configs/axios.config.js";
+
 
 class EmployeeService {
     static async getAllEmployee(page = 0, size = 10) {
-        return await axiosInstance.get(`/employees?page=${page}&size=${size}`);
+        return await axiosInstance.get(`api/employees?page=${page}&size=${size}`);
     }
 
     static async deleteEmployee(id) {
-        return await axiosInstance.delete(`/employees/${id}`);
+        return await axiosInstance.delete(`api/employees/${id}`);
     }
 
     static async getUserById(id) {

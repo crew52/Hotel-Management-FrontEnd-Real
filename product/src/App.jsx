@@ -1,12 +1,12 @@
 import './App.css'
-import RoutersAdmin from "./router/admin/RoutersAdmin.jsx";
-import RoutersLogin from "./router/login/RoutersLogin.jsx";
+import Routers from "./router/index.jsx";
+
 function App() {
-  return (
-      <>
-          <RoutersLogin/>
-          <RoutersAdmin/>
-      </>
-  )
+    return (
+        <>
+            <Routers/>
+        </>
+    )
 }
+
 export default App
