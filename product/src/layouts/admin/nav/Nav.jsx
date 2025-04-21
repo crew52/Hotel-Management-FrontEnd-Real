@@ -29,6 +29,11 @@ function Nav() {
         setSelectedMenuItem(itemKey);
         navigate(path);
     };
+    
+    const handleReceptionistClick = () => {
+        // Navigate to employee page
+        navigate('/employee');
+    };
 
     const textButtonSx = (isActive) => ({
         color: "white",
@@ -219,7 +224,7 @@ function Nav() {
                         },
                     }}
                     startIcon={<KeyboardArrowDownIcon />}
-                    onClick={() => navigate('/employees')}
+                    onClick={handleReceptionistClick}
                 >
                     Lễ tân
                 </Button>

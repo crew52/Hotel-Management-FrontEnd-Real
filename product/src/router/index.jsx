@@ -1,4 +1,5 @@
-import {Routes, Route} from "react-router-dom";
+import {Routes, Route, Navigate, Outlet} from "react-router-dom";
+import Forbidden from '../pages/Forbidden.jsx';
 import { Typography } from "@mui/material";
 import { LayoutAdmin } from "../layouts/admin/home/index.jsx";
 import { LayoutEmployee } from "../layouts/employee/home/index.jsx";
@@ -6,6 +7,8 @@ import Overview from "../pages/admin/overview/index.jsx";
 import Room from "../pages/admin/room/index.jsx";
 import Employee from "../pages/admin/employee/index.jsx";
 import RoomBookingView from "../pages/employee/roomBooking/RoomBookingView.jsx";
+import LoginPage from "../pages/auth/login/index.jsx";
+import ProtectedRoute from "../components/ProtectedRoute.jsx";
 
 const OverviewContent = () => (
     <section style={{ padding: "20px" }}>
@@ -104,9 +107,7 @@ const ReportsContent = () => (
     </section>
 );
 
-
 // xử lý giao diện employee
-
 const Bookings = () => (
    <RoomBookingView/>
 );
@@ -123,17 +124,52 @@ const Pending = () => (
     </Typography>
 );
 
+// Layout wrappers
+const AdminLayout = () => (
+    <LayoutAdmin>
+        <Outlet />
+    </LayoutAdmin>
+);
+
+const EmployeeLayout = () => (
+    <LayoutEmployee>
+        <Outlet />
+    </LayoutEmployee>
+);
+
 function Routers() {
     return (
         <Routes>
-            {/*admin*/}
-            <Route path="/admin" element={<LayoutAdmin />}>
+            {/* Public routes */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forbidden" element={<Forbidden />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+                <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER']}>
+                    <AdminLayout />
+                </ProtectedRoute>
+            }>
                 <Route index element={<OverviewContent />} />
                 <Route path="rooms" element={<RoomsContent />} />
                 <Route path="goods" element={<GoodsContent />} />
                 <Route path="transactions" element={<TransactionsContent />} />
                 <Route path="partners" element={<PartnersContent />} />
-                <Route path="employee" element={<EmployeeContent />} />
+                
+                {/* Sử dụng route protection trực tiếp, không lồng */}
+                <Route path="employee" element={
+                    <ProtectedRoute requiredPermissions="VIEW_EMPLOYEE">
+                        <EmployeeContent />
+                    </ProtectedRoute>
+                } />
+                
+                <Route path="room" element={
+                    <ProtectedRoute requiredPermissions="VIEW_ROOM">
+                        <RoomsContent />
+                    </ProtectedRoute>
+                } />
+                
                 <Route path="employee/schedule" element={<EmployeeScheduleContent />} />
                 <Route path="employee/attendance" element={<EmployeeAttendanceContent />} />
                 <Route path="employee/payroll" element={<EmployeePayrollContent />} />
@@ -142,14 +178,20 @@ function Routers() {
                 <Route path="reports" element={<ReportsContent />} />
             </Route>
 
-            {/*employee*/}
-            <Route path="/employee" element={<LayoutEmployee />}>
+            {/* Employee Routes */}
+            <Route path="/employee" element={
+                <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_RECEPTIONIST', 'ROLE_VIEWER']}>
+                    <EmployeeLayout />
+                </ProtectedRoute>
+            }>
                 <Route index element={<Bookings />} />
                 <Route path="bookings" element={<Bookings />} />
                 <Route path="invoices" element={<Invoices />} />
                 <Route path="pending" element={<Pending />} />
             </Route>
 
+            {/* Handle 404 - Page Not Found */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     );
 }

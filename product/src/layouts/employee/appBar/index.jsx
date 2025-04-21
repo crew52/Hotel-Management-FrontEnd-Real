@@ -7,14 +7,17 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import HomeIcon from "../../../icons/homeIcon.jsx";
+import authService from "../../../service/auth.service.js";
+import { toast } from 'react-toastify';
 
 export default function AppBarHeader({ onToggleMenu }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [activeButton, setActiveButton] = useState("bookings");
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -22,6 +25,19 @@ export default function AppBarHeader({ onToggleMenu }) {
 
     const handleMenuClose = () => {
         setAnchorEl(null);
+    };
+    
+    const handleLogout = () => {
+        handleMenuClose();
+        
+        // Call the authentication service logout function
+        authService.logout();
+        
+        // Show success message
+        toast.success("Đăng xuất thành công!");
+        
+        // Redirect to login page
+        navigate("/login");
     };
 
     const handleButtonClick = (buttonName) => {
@@ -173,7 +189,7 @@ export default function AppBarHeader({ onToggleMenu }) {
                         <MenuItem sx={{ py: 1.5 }}>
                             <AccountCircle fontSize="small" sx={{ mr: 1, color: "#555" }} /> Tài khoản
                         </MenuItem>
-                        <MenuItem sx={{ py: 1.5 }}>
+                        <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                             <ArrowForwardIcon fontSize="small" sx={{ mr: 1, color: "#555" }} /> Đăng xuất
                         </MenuItem>
                     </Menu>
