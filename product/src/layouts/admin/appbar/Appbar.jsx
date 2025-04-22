@@ -4,11 +4,15 @@ import React, { useState } from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import HomeIcon from "../../../icons/homeIcon.jsx";
+import authService from "../../../service/auth.service.js";
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 function Appbar() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [accountModalOpen, setAccountModalOpen] = useState(false);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -21,6 +25,15 @@ function Appbar() {
     const handleLogout = () => {
         console.log("Đăng xuất clicked");
         handleMenuClose();
+        
+        // Call the authentication service logout function
+        authService.logout();
+        
+        // Show success message
+        toast.success("Đăng xuất thành công!");
+        
+        // Redirect to login page
+        navigate("/login");
     };
 
     const handleAccount = () => {
@@ -32,8 +45,6 @@ function Appbar() {
     const handleCloseAccountModal = () => {
         setAccountModalOpen(false);
     };
-
-
 
     return (
         <>
@@ -182,8 +193,6 @@ function Appbar() {
                     </Box>
                 </Box>
             </AppBar>
-
-
         </>
     );
 }

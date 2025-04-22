@@ -3,7 +3,7 @@ import {
     Grid, Box, Typography, Checkbox, FormControlLabel, Select, MenuItem, Button,
     IconButton, FormControl, InputBase, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Paper, Collapse, Menu, Dialog, DialogTitle, DialogContent, DialogActions,
-    Snackbar, Alert
+    Snackbar, Alert, Pagination, InputAdornment, CircularProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -16,6 +16,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EmployeeService from "../../../service/admin/employee.service.js";
 import AddEmployeeDialog from "./AddEmployeeDialog.jsx";
 import EditEmployeeDialog from "./EditEmployeeDialog.jsx";
+import PermissionGuard from "../../../components/PermissionGuard.jsx";
+import { toast } from 'react-toastify';
 
 // Hàm tạo dữ liệu nhân viên
 function createEmployeeData(
@@ -68,7 +70,7 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
 
     const columnOptions = [
         { label: 'Ảnh', key: 'image' },
-        { label: 'Mã nhân viên', key: 'id' },
+        { label: 'Mã nhân viên', key: 'user_id' },
         { label: 'Tên nhân viên', key: 'fullName' },
         { label: 'Mã chấm công', key: 'user_id' },
         { label: 'Ngày sinh', key: 'dob' },
@@ -101,17 +103,9 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
     const placeholderImage = '';
 
     return (
-        <>
+        <React.Fragment>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-                <TableCell sx={{ minWidth: 50, padding: '8px 16px', textAlign: 'left' }}>
-                    <Checkbox
-                        checked={selectedRows.includes(row.id)}
-                        onChange={(e) => handleRowSelect(row.id, e)}
-                        onClick={(e) => e.stopPropagation()}
-                        size="small"
-                    />
-                </TableCell>
-                <TableCell sx={{ minWidth: 50, padding: '8px 16px', textAlign: 'left' }}>
+                <TableCell>
                     <IconButton
                         aria-label="expand row"
                         size="small"
@@ -120,31 +114,63 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
                         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                 </TableCell>
-                {selectedColumns.map((col) => (
-                    <TableCell
-                        key={col}
-                        align="left"
-                        sx={{
-                            fontSize: 13,
-                            minWidth: 120,
-                            maxWidth: 200,
-                            padding: '8px 16px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                        }}
-                    >
-                        {col === 'Ảnh' ? (
-                            <img
-                                src={row.image || placeholderImage}
-                                alt="Employee"
-                                style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
-                            />
-                        ) : (
-                            row[columnOptions.find((option) => option.label === col)?.key] || '-'
-                        )}
+                <TableCell>
+                    <Checkbox
+                        checked={selectedRows.includes(row.id)}
+                        onChange={(e) => handleRowSelect(row.id, e)}
+                        onClick={(e) => e.stopPropagation()}
+                        size="small"
+                    />
+                </TableCell>
+                {selectedColumns.map((column) => {
+                    let value = '';
+                    switch (column) {
+                        case 'Mã nhân viên':
+                            value = row.user_id;
+                            break;
+                        case 'Tên nhân viên':
+                            value = row.fullName;
+                            break;
+                        case 'Số điện thoại':
+                            value = row.phone;
+                            break;
+                        case 'Số CMND/CCCD':
+                            value = row.idCard;
+                            break;
+                        case 'Địa chỉ':
+                            value = row.address;
+                            break;
+                        case 'Chức vụ':
+                            value = row.position;
+                            break;
+                        case 'Ghi chú':
+                            value = row.note;
+                            break;
+                        default:
+                            value = '';
+                    }
+                    return (
+                        <TableCell key={column} sx={{ minWidth: '150px', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {value}
+                        </TableCell>
+                    );
+                })}
+                <TableCell align="right">
+                    <PermissionGuard permissions="EDIT_EMPLOYEE">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                handleOpenEditDialog(row);
+                            }}
+                            size="small"
+                            sx={{ mr: 1 }}
+                        >
+                            Sửa
+                        </Button>
+                    </PermissionGuard>
                     </TableCell>
-                ))}
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={selectedColumns.length + 2}>
@@ -193,7 +219,10 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
                                     variant="contained"
                                     size="small"
                                     sx={{ backgroundColor: '#00c853', textTransform: 'none', padding: '6px 12px', fontSize: '12px' }}
-                                    onClick={() => handleOpenEditDialog(row)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenEditDialog(row);
+                                    }}
                                 >
                                     Cập nhật
                                 </Button>
@@ -205,7 +234,7 @@ function Row({ row, selectedRows, handleRowSelect, selectedColumns, handleOpenEd
                     </Collapse>
                 </TableCell>
             </TableRow>
-        </>
+        </React.Fragment>
     );
 }
 
@@ -214,201 +243,150 @@ function Employee() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedColumns, setSelectedColumns] = useState([
         'Mã nhân viên', 'Tên nhân viên', 'Số điện thoại',
-        'Số CMND/CCCD', 'Địa chỉ', 'Chức vụ', 'Ghi chú'
+        'Số CMND/CCCD', 'Địa chỉ', 'Chức vụ'
     ]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(false);
+    
+    // Pagination
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [actionAnchorEl, setActionAnchorEl] = useState(null);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+    // Các column hiển thị có thể chọn
     const columnOptions = [
-        { label: 'Ảnh', key: 'image' },
-        { label: 'Mã nhân viên', key: 'id' },
+        { label: 'Mã nhân viên', key: 'user_id' },
         { label: 'Tên nhân viên', key: 'fullName' },
-        { label: 'Mã chấm công', key: 'user_id' },
+        { label: 'Số điện thoại', key: 'phone' },
+        { label: 'Số CMND/CCCD', key: 'idCard' },
+        { label: 'Địa chỉ', key: 'address' },
+        { label: 'Chức vụ', key: 'position' },
+        { label: 'Ghi chú', key: 'note' },
+        { label: 'Email', key: 'email' },
         { label: 'Ngày sinh', key: 'dob' },
         { label: 'Giới tính', key: 'gender' },
-        { label: 'Số CMND/CCCD', key: 'idCard' },
-        { label: 'Ngày bắt đầu làm việc', key: 'start_date' },
-        { label: 'Chi nhánh trực thuộc', key: 'branch' },
-        { label: 'Chi nhánh làm việc', key: 'work_branch' },
-        { label: 'Tài khoản KiotViet', key: 'login_account' },
-        { label: 'Số điện thoại', key: 'phone' },
-        { label: 'Tất cả chi nhánh', key: 'branch' },
-        { label: 'Email', key: 'email' },
-        { label: 'Facebook', key: 'facebook' },
-        { label: 'Địa chỉ', key: 'address' },
-        { label: 'Thiết bị di động', key: 'device' },
-        { label: 'Ghi chú', key: 'note' },
-        { label: 'Chức vụ', key: 'position' },
-        { label: 'Phòng ban', key: 'department' },
+        { label: 'Chi nhánh', key: 'branch' },
+        { label: 'Phòng ban', key: 'department' }
     ];
 
-    // Lấy dữ liệu từ API hoặc fallback về dữ liệu ảo
-    const fetchEmployees = async (page, size) => {
+    /**
+     * Lấy dữ liệu nhân viên từ API với phân trang
+     */
+    const fetchEmployees = async (pageNum = page, pageSize = size, searchKeyword = '') => {
+        setLoading(true);
         try {
-            const res = await EmployeeService.getAllEmployee(page, size);
-            const employeesData = res.data.content.map(emp => ({
-                id: emp.id,
-                fullName: emp.fullName,
-                phone: emp.phone,
-                idCard: emp.idCard,
-                address: emp.address,
-                position: emp.position,
-                note: emp.note,
-                user_id: emp.user?.userId || '',
-                start_date: emp.startDate,
-                device: emp.device || '-',
-                dob: emp.dob,
-                gender: emp.gender,
-                email: emp.email,
-                facebook: emp.facebook || '-',
-                branch: emp.branch,
-                work_branch: emp.workBranch || emp.branch,
-                department: emp.department,
-                login_account: emp.loginAccount || '-',
-                image: emp.imgUrl
-            }));
-            setEmployees(employeesData);
-            setFilteredEmployees(employeesData);
+            // Kiểm tra nếu đã có dữ liệu trong localStorage
+            const cachedData = sessionStorage.getItem('employeeData');
+            const timestamp = sessionStorage.getItem('employeeDataTimestamp');
+            const now = new Date().getTime();
+            
+            // Chỉ sử dụng cache nếu dữ liệu lưu trữ chưa quá 5 phút
+            if (cachedData && timestamp && (now - parseInt(timestamp) < 5 * 60 * 1000)) {
+                try {
+                    const parsedData = JSON.parse(cachedData);
+                    setEmployees(parsedData.content || []);
+                    setFilteredEmployees(parsedData.content || []);
+                    setTotalPages(parsedData.totalPages || 1);
+                    setTotalElements(parsedData.totalElements || 0);
+                    setLoading(false);
+                    console.log('Using cached employee data');
+                    return;
+                } catch (error) {
+                    console.error('Error parsing cached data:', error);
+                }
+            }
+            
+            // Fetch mới nếu không có cache hoặc cache đã hết hạn
+            const response = await EmployeeService.getAllEmployee(pageNum, pageSize, searchKeyword);
+            if (response.data) {
+                // Cập nhật state với dữ liệu mới
+                const { content, totalPages, totalElements } = response.data;
+                setEmployees(content || []);
+                setFilteredEmployees(content || []);
+                setTotalPages(totalPages || 1);
+                setTotalElements(totalElements || 0);
+                
+                // Lưu vào cache
+                sessionStorage.setItem('employeeData', JSON.stringify(response.data));
+                sessionStorage.setItem('employeeDataTimestamp', new Date().getTime().toString());
+            }
         } catch (error) {
+            console.error('Error fetching employees:', error);
+            // Hiển thị thông báo lỗi
+            setSnackbarMessage('Không thể tải danh sách nhân viên');
+            setSnackbarSeverity('error');
+            setOpenSnackbar(true);
+            
+            // Fallback to mock data nếu API lỗi
             setEmployees(mockEmployees);
             setFilteredEmployees(mockEmployees);
-            setSnackbarMessage('Lấy danh sách nhân viên thất bại! Sử dụng dữ liệu ảo.');
-            setSnackbarSeverity('warning');
-            setOpenSnackbar(true);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Gọi API lần đầu khi component mount
+    // Tải dữ liệu khi component mount hoặc khi thay đổi trang
     useEffect(() => {
-        fetchEmployees(page, size);
+        fetchEmployees(page, size, searchTerm);
     }, [page, size]);
 
-    // Xử lý tìm kiếm
+    // Xử lý tìm kiếm với debounce
     useEffect(() => {
-        const handleSearch = async () => {
-            if (!searchTerm.trim()) {
-                // Nếu không có từ khóa tìm kiếm, hiển thị danh sách phân trang
-                fetchEmployees(page, size);
-                return;
-            }
-
-            try {
-                // Gọi API tìm kiếm theo tên
-                const res = await EmployeeService.searchEmployees(searchTerm);
-
-                const employeesData = res.data.map(emp => ({
-                    id: emp.id,
-                    fullName: emp.fullName,
-                    phone: emp.phone,
-                    idCard: emp.idCard,
-                    address: emp.address,
-                    position: emp.position,
-                    note: emp.note,
-                    user_id: emp.user?.userId || '',
-                    start_date: emp.startDate,
-                    device: emp.device || '-',
-                    dob: emp.dob,
-                    gender: emp.gender,
-                    email: emp.email,
-                    facebook: emp.facebook || '-',
-                    branch: emp.branch,
-                    work_branch: emp.workBranch || emp.branch,
-                    department: emp.department,
-                    login_account: emp.loginAccount || '-',
-                    image: emp.imgUrl
-                }));
-                if (employeesData.length > 0) {
-                    setFilteredEmployees(employeesData);
-                } else {
-                    // Nếu API không trả về kết quả, tìm kiếm trên dữ liệu ảo
-                    const filtered = mockEmployees.filter((emp) =>
-                        emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-                    );
-                    setFilteredEmployees(filtered);
-                    setSnackbarMessage('Không tìm thấy nhân viên qua API, sử dụng dữ liệu ảo.');
-                    setSnackbarSeverity('info');
-                    setOpenSnackbar(true);
-                }
-            } catch (error) {
-                // Nếu API lỗi, tìm kiếm trên dữ liệu ảo
-                const filtered = mockEmployees.filter((emp) =>
-                    emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                setFilteredEmployees(filtered);
-                setSnackbarMessage('Lỗi khi tìm kiếm qua API, sử dụng dữ liệu ảo.');
-                setSnackbarSeverity('warning');
-                setOpenSnackbar(true);
-            }
-        };
-
-        handleSearch();
+        const delayDebounceFn = setTimeout(() => {
+            fetchEmployees(0, size, searchTerm);  // Reset về trang đầu tiên khi tìm kiếm
+        }, 500);
+        
+        return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
 
-    const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
-    const handleMenuClose = () => setAnchorEl(null);
-
     const handleColumnToggle = (label) => {
-        setSelectedColumns((prev) =>
+        setSelectedColumns(prev => 
             prev.includes(label)
-                ? prev.filter((col) => col !== label)
+                ? prev.filter(col => col !== label) 
                 : [...prev, label]
         );
     };
 
-    const handleRowSelect = (id, event) => {
-        event.stopPropagation();
-        setSelectedRows((prev) =>
+    const handleRowSelect = (id) => {
+        setSelectedRows(prev => 
             prev.includes(id)
-                ? prev.filter((rowId) => rowId !== id)
+                ? prev.filter(rowId => rowId !== id)
                 : [...prev, id]
         );
     };
 
-    const handleActionMenuClick = (event) => setActionAnchorEl(event.currentTarget);
-    const handleActionMenuClose = () => setActionAnchorEl(null);
-
-    const handleDeleteSelected = () => setOpenDialog(true);
-
-    const confirmDelete = async () => {
-        try {
-            await Promise.all(selectedRows.map(id => EmployeeService.deleteEmployee(id)));
-            setEmployees((prev) => prev.filter((emp) => !selectedRows.includes(emp.id)));
-            setFilteredEmployees((prev) => prev.filter((emp) => !selectedRows.includes(emp.id)));
+    const handleSelectAllRows = (event) => {
+        if (event.target.checked) {
+            setSelectedRows(filteredEmployees.map(emp => emp.id));
+        } else {
             setSelectedRows([]);
-            setSnackbarMessage('Xóa nhân viên thành công!');
-            setSnackbarSeverity('success');
-        } catch (error) {
-            setSnackbarMessage(`Xóa nhân viên thất bại: ${error.message}`);
-            setSnackbarSeverity('error');
-        } finally {
-            setOpenSnackbar(true);
-            setOpenDialog(false);
-            setActionAnchorEl(null);
         }
     };
 
-    const handleSnackbarClose = () => setOpenSnackbar(false);
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage - 1); // MUI Pagination is 1-indexed, our API is 0-indexed
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setSize(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     const handleOpenAddDialog = () => {
         setSelectedEmployee(null);
         setOpenAddDialog(true);
-    };
-
-    const handleCloseAddDialog = () => {
-        setOpenAddDialog(false);
-        setSelectedEmployee(null);
     };
 
     const handleOpenEditDialog = (employee) => {
@@ -416,165 +394,218 @@ function Employee() {
         setOpenEditDialog(true);
     };
 
-    const handleCloseEditDialog = () => {
+    const handleOpenDeleteDialog = () => {
+        if (selectedRows.length === 0) {
+            setSnackbarMessage('Vui lòng chọn ít nhất một nhân viên để xóa');
+            setSnackbarSeverity('warning');
+            setOpenSnackbar(true);
+            return;
+        }
+        setOpenDeleteDialog(true);
+    };
+
+    const handleDeleteEmployees = async () => {
+        try {
+            setLoading(true);
+            // Xóa nhiều nhân viên cùng lúc
+            for (const id of selectedRows) {
+                await EmployeeService.deleteEmployee(id);
+            }
+            
+            setSnackbarMessage(`Đã xóa ${selectedRows.length} nhân viên thành công`);
+            setSnackbarSeverity('success');
+            setOpenSnackbar(true);
+            setSelectedRows([]);
+            setOpenDeleteDialog(false);
+            fetchEmployees(); // Tải lại dữ liệu
+        } catch (error) {
+            console.error('Error deleting employees:', error);
+            setSnackbarMessage('Xóa nhân viên thất bại');
+            setSnackbarSeverity('error');
+            setOpenSnackbar(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEmployeeAdded = () => {
+        setOpenAddDialog(false);
+        fetchEmployees();
+        setSnackbarMessage('Thêm nhân viên thành công!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+    };
+
+    const handleEmployeeUpdated = () => {
         setOpenEditDialog(false);
-        setSelectedEmployee(null);
+        fetchEmployees();
+        setSnackbarMessage('Cập nhật nhân viên thành công!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
     };
 
     return (
-        <Grid container spacing={0.5}>
-            <Grid size={{ xs: 4, md: 2.4 }}>
-                <Box sx={{ mt: 2 }}>
-                    <Typography variant="h6" sx={{ ml: 2, mb: 0.5, fontWeight: 'bold' }}>Danh sách nhân viên</Typography>
-                    <Typography color="textSecondary" sx={{ fontSize: 13, ml: 2, mb: 1 }}>Đã sử dụng nhân viên</Typography>
-                </Box>
+        <Box sx={{ p: 3 }}>
+            <Typography variant="h4" sx={{ mb: 3 }}>Quản lý nhân viên</Typography>
 
-                <Box sx={{ marginLeft: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 2, mb: 3, boxShadow: 1 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold', fontSize: 13 }}>Trạng thái nhân viên</Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', fontSize: 13 }}>
-                        <FormControlLabel control={<Checkbox defaultChecked size="small" />} label={<Typography sx={{ fontSize: 13 }}>Đang làm việc</Typography>} />
-                        <FormControlLabel control={<Checkbox size="small" />} label={<Typography sx={{ fontSize: 13 }}>Đã nghỉ</Typography>} />
-                    </Box>
-                </Box>
+            {/* Thanh công cụ và tìm kiếm */}
+            <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                        <PermissionGuard permissions="CREATE_EMPLOYEE">
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<AddIcon />}
+                                onClick={handleOpenAddDialog}
+                                sx={{ borderRadius: 2 }}
+                                disabled={loading}
+                            >
+                                Thêm nhân viên
+                            </Button>
+                        </PermissionGuard>
 
-                <Box sx={{ marginLeft: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 2, mb: 3, boxShadow: 1, backgroundColor: '#ffffff' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold', fontSize: 13 }}>Phòng ban</Typography>
-                        <Box>
-                            <IconButton size="small" sx={{ mr: 0.5 }}><AddIcon fontSize="small" /></IconButton>
-                            <IconButton size="small"><ExpandLessIcon fontSize="small" /></IconButton>
-                        </Box>
-                    </Box>
-                    <FormControl fullWidth size="small">
-                        <Select displayEmpty defaultValue="" sx={{ borderRadius: 1, height: 32, ml: 1, mr: 1, mb: 2, backgroundColor: '#ffffff' }}>
-                            <MenuItem value="" disabled>Chọn phòng ban</MenuItem>
-                            <MenuItem value="Phòng PV">Phòng PV</MenuItem>
-                            <MenuItem value="Phòng AI">Phòng AI</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Box>
-
-                <Box sx={{ marginLeft: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 2, mb: 3, boxShadow: 1, backgroundColor: '#ffffff' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="subtitle2" sx={{ mt: 1, ml: 1, mb: 1, fontWeight: 'bold', fontSize: 13 }}>Chức danh</Typography>
-                        <Box>
-                            <IconButton size="small" sx={{ mr: 0.5 }}><AddIcon fontSize="small" /></IconButton>
-                            <IconButton size="small"><ExpandLessIcon fontSize="small" /></IconButton>
-                        </Box>
-                    </Box>
-                    <FormControl fullWidth size="small">
-                        <Select displayEmpty defaultValue="" sx={{ borderRadius: 1, height: 32, ml: 1, mr: 1, mb: 2, backgroundColor: '#ffffff' }}>
-                            <MenuItem value="" disabled>Chọn chức danh</MenuItem>
-                            <MenuItem value="Trưởng phòng">Trưởng phòng</MenuItem>
-                            <MenuItem value="Nhân viên">Nhân viên</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Box>
-
-                <Box sx={{ ml: 1, p: 1.5, border: '1px solid #e0e0e0', borderRadius: 2, boxShadow: 1, backgroundColor: '#ffffff', mb: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="subtitle2" sx={{ mb: 3, fontWeight: 'bold', fontSize: 13, height: 40 }}>Số bản ghi:</Typography>
-                        <FormControl size="small" sx={{ width: 80, height: 24 }}>
-                            <Select value={size} onChange={(e) => setSize(e.target.value)} sx={{ borderRadius: 1, height: 28 }}>
-                                <MenuItem value={10}>10</MenuItem>
-                                <MenuItem value={20}>20</MenuItem>
-                                <MenuItem value={50}>50</MenuItem>
+                        <PermissionGuard permissions="DELETE_EMPLOYEE">
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={handleOpenDeleteDialog}
+                                disabled={selectedRows.length === 0 || loading}
+                                sx={{ borderRadius: 2 }}
+                            >
+                                Xóa ({selectedRows.length})
+                            </Button>
+                        </PermissionGuard>
+                        
+                        <FormControl sx={{ minWidth: 120 }}>
+                            <Select
+                                displayEmpty
+                                size="small"
+                                value=""
+                                disabled={loading}
+                                renderValue={() => "Xuất/Nhập"}
+                            >
+                                <MenuItem value="">
+                                    <em>Chọn thao tác</em>
+                                </MenuItem>
+                                <MenuItem value="export_excel">Xuất Excel</MenuItem>
+                                <MenuItem value="import_excel">Nhập Excel</MenuItem>
                             </Select>
                         </FormControl>
-                    </Box>
                 </Box>
             </Grid>
 
-            <Grid size={{ xs: 6, md: 9.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mt: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: 420, height: 26, border: '1px solid #e0e0e0', borderRadius: '6px', px: 1.5, py: 0.5, mt: 1, ml: 2, backgroundColor: '#ffffff', boxShadow: 1 }}>
-                        <SearchIcon sx={{ fontSize: 20, color: 'gray', mr: 1 }} />
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                        <IconButton 
+                            onClick={() => setAnchorEl(event.currentTarget)}
+                            disabled={loading}
+                        >
+                            <AppRegistrationIcon />
+                        </IconButton>
+                        
+                        <Paper
+                            component="form"
+                            sx={{ display: 'flex', alignItems: 'center', width: 300, borderRadius: 2 }}
+                        >
                         <InputBase
-                            placeholder="Tìm theo mã chấm công, tên nhân viên"
-                            sx={{ fontSize: 14, flex: 1 }}
-                            inputProps={{ 'aria-label': 'search employee' }}
+                                sx={{ ml: 1, flex: 1 }}
+                                placeholder="Tìm kiếm nhân viên..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                                disabled={loading}
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                }
+                            />
+                            {loading && searchTerm && (
+                                <CircularProgress size={20} sx={{ mr: 1 }} />
+                            )}
+                        </Paper>
                     </Box>
-                    {selectedRows.length > 0 && (
-                        <>
-                            <Button
-                                variant="contained"
-                                startIcon={<UploadFileIcon sx={{ fontSize: '16px' }} />}
-                                size="small"
-                                sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '6px 8px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}
-                                onClick={handleActionMenuClick}
-                            >
-                                Thao tác
-                            </Button>
-                            <Menu anchorEl={actionAnchorEl} open={Boolean(actionAnchorEl)} onClose={handleActionMenuClose} disableAutoFocusItem={true}>
-                                <MenuItem onClick={handleDeleteSelected}>Xóa</MenuItem>
-                            </Menu>
-                        </>
-                    )}
+                </Grid>
+            </Grid>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon sx={{ fontSize: '16px' }} />}
-                            size="small"
-                            sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}
-                            onClick={handleOpenAddDialog}>
-                            Nhân viên
-                        </Button>
-                        <Button variant="contained" startIcon={<UploadFileIcon sx={{ fontSize: '16px' }} />} size="small" sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '4px 8px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}>
-                            Nhập file
-                        </Button>
-                        <Button variant="contained" startIcon={<DownloadIcon sx={{ fontSize: '16px' }} />} size="small" sx={{ backgroundColor: '#00b63e', textTransform: 'none', borderRadius: '8px', padding: '4px 8px', fontSize: '12px', '& .MuiButton-startIcon': { marginRight: '4px' } }}>
-                            Xuất file
-                        </Button>
-                        <IconButton sx={{ padding: '2px' }} onClick={handleMenuClick}>
-                            <AppRegistrationIcon sx={{ fontSize: '26px' }} />
-                        </IconButton>
-                        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} PaperProps={{ style: { maxHeight: 400, width: 350 } }} disableAutoFocusItem={true}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
-                                <Box>
-                                    {columnOptions.slice(0, 10).map((option) => (
+            {/* Menu chọn cột hiển thị */}
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() => setAnchorEl(null)}
+            >
+                <Typography variant="subtitle2" sx={{ p: 2 }}>Chọn cột hiển thị</Typography>
+                <Box sx={{ px: 2, maxHeight: 300, overflow: 'auto' }}>
+                    {columnOptions.map(option => (
                                         <FormControlLabel
                                             key={option.label}
-                                            control={<Checkbox checked={selectedColumns.includes(option.label)} onChange={() => handleColumnToggle(option.label)} size="small" sx={{ p: 0.8 }} />}
-                                            label={<Typography variant="body2" sx={{ fontSize: '12px' }}>{option.label}</Typography>}
-                                            sx={{ '& .MuiFormControlLabel-label': { fontSize: '12px' }, ml: 1 }}
+                            control={
+                                <Checkbox
+                                    checked={selectedColumns.includes(option.label)}
+                                    onChange={() => handleColumnToggle(option.label)}
+                                    size="small"
+                                />
+                            }
+                            label={option.label}
                                         />
                                     ))}
                                 </Box>
-                                <Box>
-                                    {columnOptions.slice(10).map((option) => (
-                                        <FormControlLabel
-                                            key={option.label}
-                                            control={<Checkbox checked={selectedColumns.includes(option.label)} onChange={() => handleColumnToggle(option.label)} size="small" sx={{ p: 0.8 }} />}
-                                            label={<Typography variant="body2" sx={{ fontSize: '12px' }}>{option.label}</Typography>}
-                                            sx={{ '& .MuiFormControlLabel-label': { fontSize: '12px' }, ml: 1 }}
-                                        />
-                                    ))}
-                                </Box>
+            </Menu>
+
+            {/* Bảng hiển thị nhân viên */}
+            <Paper sx={{ width: '100%', overflow: 'hidden', mb: 3 }}>
+                <TableContainer component={Paper} sx={{ position: 'relative' }}>
+                    {loading && (
+                        <Box 
+                            sx={{ 
+                                position: 'absolute', 
+                                top: 0, 
+                                left: 0, 
+                                right: 0, 
+                                zIndex: 1, 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                p: 1, 
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: '4px 4px 0 0'
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CircularProgress size={20} thickness={5} />
+                                <Typography variant="caption">Đang tải dữ liệu...</Typography>
                             </Box>
-                        </Menu>
                     </Box>
-                </Box>
-
-                <Box sx={{ mt: 3, ml: 2, border: '1px solid #e0e0e0', borderRadius: 1, boxShadow: 1, backgroundColor: '#ffffff' }}>
-                    <TableContainer component={Paper}>
-                        <Table aria-label="collapsible table">
-                            <TableHead sx={{ backgroundColor: '#eaf2ff' }}>
+                    )}
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                        indeterminate={selectedRows.length > 0 && selectedRows.length < filteredEmployees.length}
+                                        checked={filteredEmployees.length > 0 && selectedRows.length === filteredEmployees.length}
+                                        onChange={handleSelectAllRows}
+                                        disabled={loading}
+                                    />
+                                </TableCell>
+                                <TableCell>Chi tiết</TableCell>
+                                {selectedColumns.map(column => (
+                                    <TableCell key={column} sx={{ fontWeight: 'bold' }}>
+                                        {column}
+                                    </TableCell>
+                                ))}
+                                <TableCell align="right">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {!loading && filteredEmployees.length === 0 && (
                                 <TableRow>
-                                    <TableCell sx={{ minWidth: 50, padding: '8px 16px', textAlign: 'left' }} />
-                                    <TableCell sx={{ minWidth: 50, padding: '8px 16px', textAlign: 'left' }} />
-                                    {selectedColumns.map((col) => (
-                                        <TableCell key={col} sx={{ fontWeight: 'bold', fontSize: 13, minWidth: 120, maxWidth: 200, padding: '8px 16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {col}
+                                    <TableCell colSpan={selectedColumns.length + 3} align="center">
+                                        <Typography variant="body1" sx={{ my: 3 }}>Không có dữ liệu nhân viên</Typography>
                                         </TableCell>
-                                    ))}
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredEmployees.map((employee) => (
+                            )}
+                            
+                            {!loading && filteredEmployees.map(employee => (
                                     <Row
                                         key={employee.id}
                                         row={employee}
@@ -587,36 +618,102 @@ function Employee() {
                             </TableBody>
                         </Table>
                     </TableContainer>
+                
+                {/* Phân trang */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="body2">
+                            Hiển thị {filteredEmployees.length} / {totalElements} nhân viên
+                        </Typography>
+                        
+                        <FormControl size="small" sx={{ minWidth: 80 }}>
+                            <Select
+                                value={size}
+                                onChange={handleChangeRowsPerPage}
+                                disabled={loading}
+                            >
+                                <MenuItem value={5}>5</MenuItem>
+                                <MenuItem value={10}>10</MenuItem>
+                                <MenuItem value={25}>25</MenuItem>
+                                <MenuItem value={50}>50</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    
+                    <Pagination 
+                        count={totalPages}
+                        page={page + 1}
+                        onChange={handleChangePage}
+                        color="primary"
+                        disabled={loading}
+                    />
                 </Box>
+            </Paper>
 
-                <Dialog open={openDialog} onClose={() => setOpenDialog(false)} disableRestoreFocus={true}>
-                    <DialogTitle>Xác nhận xóa</DialogTitle>
-                    <DialogContent>Bạn có chắc chắn muốn xóa {selectedRows.length} nhân viên?</DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
-                        <Button onClick={confirmDelete} color="error">Xóa</Button>
-                    </DialogActions>
-                </Dialog>
-
+            {/* Dialog thêm nhân viên */}
+            <PermissionGuard permissions="CREATE_EMPLOYEE">
                 <AddEmployeeDialog
                     open={openAddDialog}
-                    onClose={handleCloseAddDialog}
-                    fetchAllEmployees={() => fetchEmployees(page, size)}
-                    employee={selectedEmployee}
+                    onClose={() => setOpenAddDialog(false)}
+                    onAddSuccess={handleEmployeeAdded}
                 />
+            </PermissionGuard>
 
+            {/* Dialog chỉnh sửa nhân viên */}
+            <PermissionGuard permissions="EDIT_EMPLOYEE">
                 <EditEmployeeDialog
                     open={openEditDialog}
-                    onClose={handleCloseEditDialog}
-                    employeeData={selectedEmployee}
-                    fetchAllEmployees={() => fetchEmployees(page, size)}
+                    onClose={() => setOpenEditDialog(false)}
+                    employee={selectedEmployee}
+                    onEditSuccess={handleEmployeeUpdated}
                 />
+            </PermissionGuard>
 
-                <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-                    <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>{snackbarMessage}</Alert>
+            {/* Dialog xác nhận xóa nhân viên */}
+            <PermissionGuard permissions="DELETE_EMPLOYEE">
+                <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                    <DialogTitle>Xác nhận xóa</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Bạn có chắc chắn muốn xóa {selectedRows.length} nhân viên đã chọn?
+                        </Typography>
+                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                            Lưu ý: Hành động này không thể hoàn tác.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenDeleteDialog(false)} disabled={loading}>
+                            Hủy
+                        </Button>
+                        <Button 
+                            variant="contained" 
+                            color="error" 
+                            onClick={handleDeleteEmployees}
+                            disabled={loading}
+                        >
+                            {loading ? <CircularProgress size={24} /> : 'Xóa'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </PermissionGuard>
+
+            {/* Thông báo */}
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={5000}
+                onClose={() => setOpenSnackbar(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert 
+                    onClose={() => setOpenSnackbar(false)} 
+                    severity={snackbarSeverity} 
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarMessage}
+                </Alert>
                 </Snackbar>
-            </Grid>
-        </Grid>
+        </Box>
     );
 }
 

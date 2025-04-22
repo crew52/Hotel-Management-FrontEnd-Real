@@ -10,8 +10,29 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import LogoutIcon from "@mui/icons-material/Logout";
+import authService from "../../../service/auth.service.js";
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function SideMenu({ menuRef }) {
+    const navigate = useNavigate();
+    
+    const handleLogout = () => {
+        // Call the authentication service logout function
+        authService.logout();
+        
+        // Show success message
+        toast.success("Đăng xuất thành công!");
+        
+        // Redirect to login page
+        navigate("/login");
+    };
+    
+    const handleAdminClick = () => {
+        // Navigate to admin page
+        navigate('/admin');
+    };
+    
     return (
         <Box
             ref={menuRef}
@@ -29,7 +50,7 @@ export default function SideMenu({ menuRef }) {
                 overflowY: "auto",
             }}
         >
-            <MenuItem>
+            <MenuItem onClick={handleAdminClick}>
                 <ManageAccountsIcon fontSize="small" sx={{ mr: 1 }} /> Quản lý
             </MenuItem>
             <Divider sx={{ my: 1, mx: "10px", backgroundColor: "#ccc" }} />
@@ -66,7 +87,7 @@ export default function SideMenu({ menuRef }) {
                 Hỗ trợ:
                 <Typography sx={{ fontWeight: 600, ml: 1, color: "green" }}>1900 6522</Typography>
             </MenuItem>
-            <MenuItem sx={{ color: "red" }}>
+            <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
                 <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Đăng xuất
             </MenuItem>
         </Box>
