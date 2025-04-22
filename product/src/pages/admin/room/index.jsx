@@ -1,8 +1,14 @@
+import {Container} from "@mui/material";
+import { Outlet } from "react-router-dom";
+
+
 function Room(){
     return(
-        <h1>
-            Room
-        </h1>
+        <div>
+        <Container>
+            <Outlet />
+        </Container>
+        </div>
     )
 }
 
